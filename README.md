@@ -1,5 +1,8 @@
-Memcache client and middleware for Swift that is able to do SASL auth.
-It requires eventlet and pure\_sasl
+Memcache client and middleware that supports SASL auth.  This was written for
+Openstack Swift, but there's nothing swift-specific in it.
+
+It has no dependencies (though it will try to import eventlet.socket and
+simplejson, falling back on stdlib socket and json).
 
 You can set a username and password in the filter section of your proxy config
 when you add the middleware, or to your /etc/swift/memcached.conf if you swing

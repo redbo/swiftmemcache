@@ -6,13 +6,18 @@ import logging
 import time
 from bisect import bisect
 from hashlib import md5
+
 try:
     import simplejson as json
 except ImportError:
     import json
 
-from eventlet.green import socket
-from puresasl.client import SASLClient
+try:
+    from eventlet.green import socket
+except ImportError:
+    import socket
+
+from swiftmemcache.sasl import SaslAuth
 
 
 DEFAULT_MEMCACHED_PORT = 11211
@@ -161,15 +166,15 @@ class MemcacheRing(object):
         if status == STATUS_UNKNOWN_COMMAND:
             raise MemcacheConnectionError('Auth not enabled on memcached')
         mechs = value.split()
-        sasl = SASLClient(host, 'memcache', username=username,
-                          password=password)
-        sasl.choose_mechanism(mechs)
-        logging.debug("Chose SASL mechanism %s", sasl.mechanism)
-        sock.sendall(self.make_packet(OP_SASL_REQ, sasl.mechanism, ''))
+        sasl = SaslAuth(host, mechs, username=username,
+                        password=password)
+        sock.sendall(self.make_packet(OP_SASL_REQ, sasl.mechanism,
+                                      sasl.request()))
         status, challenge, extras = self.read_packet(sock)
+        print "INITIAL CHALLENGE: %s" % challenge
         while status == STATUS_CONTINUE_AUTH:
             sock.sendall(self.make_packet(OP_SASL_CONTINUE, sasl.mechanism,
-                                          sasl.process(challenge)))
+                                          sasl.respond(challenge)))
             status, challenge, extras = self.read_packet(sock)
         if status == STATUS_UNAUTHORIZED:
             raise MemcacheConnectionError('Authentication failed')
