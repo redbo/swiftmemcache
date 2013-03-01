@@ -154,22 +154,23 @@ class MemcacheRing(object):
 
     def _authenticate(self, host, sock, username, password):
         if not username or not password:
+            logging.info('No credentials for %s, not authenticating', host)
             return
         sock.sendall(self.make_packet(OP_SASL_MECHS))
         status, value, extras = self.read_packet(sock)
         if status == STATUS_UNKNOWN_COMMAND:
-            raise Exception('Auth not enabled on memcached')
+            raise MemcacheConnectionError('Auth not enabled on memcached')
         mechs = value.split()
         sasl = SASLClient(host, 'memcache', username=username,
                           password=password)
         sasl.choose_mechanism(mechs)
-        response = ''
-        status = STATUS_CONTINUE_AUTH
+        logging.debug("Chose SASL mechanism %s", sasl.mechanism)
+        sock.sendall(self.make_packet(OP_SASL_REQ, sasl.mechanism, ''))
+        status, challenge, extras = self.read_packet(sock)
         while status == STATUS_CONTINUE_AUTH:
-            sock.sendall(self.make_packet(OP_SASL_REQ, sasl.mechanism,
-                                          response))
+            sock.sendall(self.make_packet(OP_SASL_CONTINUE, sasl.mechanism,
+                                          sasl.process(challenge)))
             status, challenge, extras = self.read_packet(sock)
-            response = sasl.process(challenge)
         if status == STATUS_UNAUTHORIZED:
             raise MemcacheConnectionError('Authentication failed')
 
