@@ -214,15 +214,14 @@ class MemcacheRing(object):
                 self._exception_occurred(server, e)
 
     def incr(self, key, delta, time=0):
-        if delta < 0:
-            return self.decr(key, delta, time)
         key = md5hash(key)
         if time > (30 * 24 * 60 * 60):
             time += int(time.time())
-        extras = struct.pack('!QQI', abs(delta), 0, time)
         if delta < 0:
+            extras = struct.pack('!QQI', abs(delta), 0, time)
             packet = self.make_packet(OP_DECREMENT, key, '', extras)
         else:
+            extras = struct.pack('!QQI', delta, delta, time)
             packet = self.make_packet(OP_INCREMENT, key, '', extras)
         for (server, sock) in self._get_conns(key):
             try:
