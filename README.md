@@ -14,15 +14,15 @@ connection = MemcacheRing(['127.0.0.1'], username='user', password='pass')
 connection.set('hello', 'world')
 
 print connection.get('hello')
-> world
+>> world
 
 connection.delete('hello')
 
 print connection.incr('counter', 1)
-> 1
+>> 1
 
 print connection.decr('counter', 1)
-> 0
+>> 0
 
 connection.delete('counter')
 ```
