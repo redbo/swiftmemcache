@@ -1,4 +1,5 @@
-This is a pure python memcache client that supports SASL auth.
+This is a pure python memcache client that supports SASL auth (DIGEST-MD5,
+CRAM-MD5, PLAIN and LOGIN mechanisms).
 
 It has no dependencies (though it will try to import eventlet.socket and
 simplejson, falling back on stdlib socket and json).
