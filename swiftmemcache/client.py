@@ -12,10 +12,7 @@ except ImportError:
     import json
 
 from eventlet.green import socket
-try:
-    from puresasl.client import SASLClient
-except:
-    SASLClient = None
+from puresasl.client import SASLClient
 
 
 DEFAULT_MEMCACHED_PORT = 11211
@@ -126,7 +123,7 @@ class MemcacheRing(object):
                     sock.settimeout(self._io_timeout)
                     self._authenticate(host, sock, username, password)
                     yield server, sock
-                except Exception, e:
+                except Exception as e:
                     self._exception_occurred(server, e, 'connecting')
         raise MemcacheConnectionError('Unable to get server connection')
 
@@ -156,7 +153,7 @@ class MemcacheRing(object):
         return status, value, extras
 
     def _authenticate(self, host, sock, username, password):
-        if not username or not password or not SASLClient:
+        if not username or not password:
             return
         sock.sendall(self.make_packet(OP_SASL_MECHS))
         status, value, extras = self.read_packet(sock)
@@ -191,7 +188,7 @@ class MemcacheRing(object):
                     return json.loads(value)
                 else:
                     return value
-            except Exception, e:
+            except Exception as e:
                 self._exception_occurred(server, e)
 
     def set(self, key, value, serialize=True, time=0, min_compress_len=0):
@@ -208,7 +205,7 @@ class MemcacheRing(object):
                 self.read_packet(sock)
                 self._return_conn(server, sock)
                 return
-            except Exception, e:
+            except Exception as e:
                 self._exception_occurred(server, e)
 
     def incr(self, key, delta, time=0):
@@ -229,7 +226,7 @@ class MemcacheRing(object):
                 self._return_conn(server, sock)
                 if status == STATUS_NO_ERROR:
                     return struct.unpack('!Q', value)[0]
-            except Exception, e:
+            except Exception as e:
                 self._exception_occurred(server, e)
 
     def decr(self, key, delta, time=0):
@@ -244,5 +241,5 @@ class MemcacheRing(object):
                 self.read_packet(sock)
                 self._return_conn(server, sock)
                 return
-            except Exception, e:
+            except Exception as e:
                 self._exception_occurred(server, e)
