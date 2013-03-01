@@ -12,7 +12,7 @@ setup(
         'console_scripts': [
         ],
         'paste.filter_factory': [
-        'memcache=swiftmemcache.middleware:filter_factory',
+        'swift_middleware=swiftmemcache.middleware:filter_factory',
         ],
     },
 )
