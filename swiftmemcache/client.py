@@ -171,7 +171,6 @@ class MemcacheRing(object):
         sock.sendall(self.make_packet(OP_SASL_REQ, sasl.mechanism,
                                       sasl.request()))
         status, challenge, extras = self.read_packet(sock)
-        print "INITIAL CHALLENGE: %s" % challenge
         while status == STATUS_CONTINUE_AUTH:
             sock.sendall(self.make_packet(OP_SASL_CONTINUE, sasl.mechanism,
                                           sasl.respond(challenge)))
