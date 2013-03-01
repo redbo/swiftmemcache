@@ -156,7 +156,6 @@ class MemcacheRing(object):
         return status, value, extras
 
     def _authenticate(self, host, sock, username, password):
-        print "AUTHENTICATING %s %s %r" % (username, password, SASLClient)
         if not username or not password or not SASLClient:
             return
         sock.sendall(self.make_packet(OP_SASL_MECHS))
@@ -247,19 +246,3 @@ class MemcacheRing(object):
                 return
             except Exception, e:
                 self._exception_occurred(server, e)
-
-if __name__ == '__main__':
-    mc = MemcacheRing(['memcached:apassword@127.0.0.1:11211'], username='memcached', password='somethingelse')
-    print "setting"
-    mc.set('hi', 'there')
-    print "getting"
-    print mc.get('hi')
-    print "deleting"
-    mc.delete('hi')
-    print "getting again"
-    print mc.get('hi')
-    print mc.incr('counter', 1)
-    print mc.decr('counter', 1)
-    mc.delete('counter')
-    print mc.incr('counter', 1)
-    print mc.decr('counter', 1)
