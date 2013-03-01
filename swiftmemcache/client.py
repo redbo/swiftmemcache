@@ -3,7 +3,6 @@
 
 import struct
 import logging
-import socket
 import time
 from bisect import bisect
 from hashlib import md5
@@ -11,6 +10,8 @@ try:
     import simplejson as json
 except ImportError:
     import json
+
+from eventlet.green import socket
 try:
     from puresasl.client import SASLClient
 except:
